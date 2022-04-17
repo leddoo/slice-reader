@@ -1,0 +1,9 @@
+[package]
+name = "slice-reader"
+version = "0.1.0"
+edition = "2021"
+
+
+[lib]
+name = "slice_reader"
+path = "src/lib.rs"
