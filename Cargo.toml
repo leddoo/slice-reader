@@ -3,6 +3,8 @@ name = "slice-reader"
 version = "0.1.0"
 edition = "2021"
 
+[dependencies]
+simple-byte-order = {version = "0.1.0", git = "https://github.com/leddoo/simple-byte-order"}
 
 [lib]
 name = "slice_reader"

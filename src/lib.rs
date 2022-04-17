@@ -65,31 +65,15 @@ impl<'rdr, T> Reader<'rdr, T> {
 }
 
 
+
+use byte_order::*;
+
 impl<'rdr> Reader<'rdr, u8> {
     pub fn peek_bytes<const N: usize>(&self) -> Option<[u8; N]> {
         let mut bytes = [0; N];
         bytes.copy_from_slice(self.peek_n(N)?);
         Some(bytes)
     }
-
-    pub fn peek_bytes_le<const N: usize>(&self) -> Option<[u8; N]> {
-        #[cfg(target_endian = "little")] {
-            self.peek_bytes::<N>()
-        }
-        #[cfg(target_endian = "big")] {
-            self.peek_bytes::<N>().map(|mut bytes| { bytes.reverse(); bytes })
-        }
-    }
-
-    pub fn peek_bytes_be<const N: usize>(&self) -> Option<[u8; N]> {
-        #[cfg(target_endian = "little")] {
-            self.peek_bytes::<N>().map(|mut bytes| { bytes.reverse(); bytes })
-        }
-        #[cfg(target_endian = "big")] {
-            self.peek_bytes::<N>()
-        }
-    }
-
 
     pub fn next_bytes<const N: usize>(&mut self) -> Option<[u8; N]> {
         self.peek_bytes::<N>().map(|result| {
@@ -98,112 +82,106 @@ impl<'rdr> Reader<'rdr, u8> {
         })
     }
 
-    pub fn next_bytes_le<const N: usize>(&mut self) -> Option<[u8; N]> {
-        self.peek_bytes_le::<N>().map(|result| {
-            self.cursor += N;
-            result
-        })
+    pub fn peek_bytes_endian<const N: usize, B: ByteOrder>(&self) -> Option<[u8; N]> {
+        self.peek_bytes::<N>().map(B::swap_bytes)
     }
 
-    pub fn next_bytes_be<const N: usize>(&mut self) -> Option<[u8; N]> {
-        self.peek_bytes_be::<N>().map(|result| {
-            self.cursor += N;
-            result
-        })
+    pub fn next_bytes_endian<const N: usize, B: ByteOrder>(&mut self) -> Option<[u8; N]> {
+        self.next_bytes::<N>().map(B::swap_bytes)
     }
+}
 
 
-    pub fn next_u8   (&mut self) -> Option<u8> { self.next_bytes::<1>().map(u8::from_ne_bytes) }
-    pub fn next_u8_ne(&mut self) -> Option<u8> { self.next_bytes::<1>().map(u8::from_ne_bytes) }
-    pub fn next_u8_le(&mut self) -> Option<u8> { self.next_bytes::<1>().map(u8::from_le_bytes) }
-    pub fn next_u8_be(&mut self) -> Option<u8> { self.next_bytes::<1>().map(u8::from_be_bytes) }
-    pub fn peek_u8   (&self)     -> Option<u8> { self.peek_bytes::<1>().map(u8::from_ne_bytes) }
-    pub fn peek_u8_ne(&self)     -> Option<u8> { self.peek_bytes::<1>().map(u8::from_ne_bytes) }
-    pub fn peek_u8_le(&self)     -> Option<u8> { self.peek_bytes::<1>().map(u8::from_le_bytes) }
-    pub fn peek_u8_be(&self)     -> Option<u8> { self.peek_bytes::<1>().map(u8::from_be_bytes) }
+// generated using gen.py
+impl<'rdr> Reader<'rdr, u8> {
+    pub fn peek_u8<B: ByteOrder>(&self) -> Option<u8> { self.peek_bytes::<1>().map(B::read_u8) }
+    pub fn peek_u8_ne(&self) -> Option<u8> { self.peek_u8::<NativeEndian>() }
+    pub fn peek_u8_le(&self) -> Option<u8> { self.peek_u8::<LittleEndian>() }
+    pub fn peek_u8_be(&self) -> Option<u8> { self.peek_u8::<BigEndian>() }
+    pub fn next_u8<B: ByteOrder>(&mut self) -> Option<u8> { self.next_bytes::<1>().map(B::read_u8) }
+    pub fn next_u8_ne(&mut self) -> Option<u8> { self.next_u8::<NativeEndian>() }
+    pub fn next_u8_le(&mut self) -> Option<u8> { self.next_u8::<LittleEndian>() }
+    pub fn next_u8_be(&mut self) -> Option<u8> { self.next_u8::<BigEndian>() }
 
-    pub fn next_u16   (&mut self) -> Option<u16> { self.next_bytes::<2>().map(u16::from_ne_bytes) }
-    pub fn next_u16_ne(&mut self) -> Option<u16> { self.next_bytes::<2>().map(u16::from_ne_bytes) }
-    pub fn next_u16_le(&mut self) -> Option<u16> { self.next_bytes::<2>().map(u16::from_le_bytes) }
-    pub fn next_u16_be(&mut self) -> Option<u16> { self.next_bytes::<2>().map(u16::from_be_bytes) }
-    pub fn peek_u16   (&self)     -> Option<u16> { self.peek_bytes::<2>().map(u16::from_ne_bytes) }
-    pub fn peek_u16_ne(&self)     -> Option<u16> { self.peek_bytes::<2>().map(u16::from_ne_bytes) }
-    pub fn peek_u16_le(&self)     -> Option<u16> { self.peek_bytes::<2>().map(u16::from_le_bytes) }
-    pub fn peek_u16_be(&self)     -> Option<u16> { self.peek_bytes::<2>().map(u16::from_be_bytes) }
+    pub fn peek_u16<B: ByteOrder>(&self) -> Option<u16> { self.peek_bytes::<2>().map(B::read_u16) }
+    pub fn peek_u16_ne(&self) -> Option<u16> { self.peek_u16::<NativeEndian>() }
+    pub fn peek_u16_le(&self) -> Option<u16> { self.peek_u16::<LittleEndian>() }
+    pub fn peek_u16_be(&self) -> Option<u16> { self.peek_u16::<BigEndian>() }
+    pub fn next_u16<B: ByteOrder>(&mut self) -> Option<u16> { self.next_bytes::<2>().map(B::read_u16) }
+    pub fn next_u16_ne(&mut self) -> Option<u16> { self.next_u16::<NativeEndian>() }
+    pub fn next_u16_le(&mut self) -> Option<u16> { self.next_u16::<LittleEndian>() }
+    pub fn next_u16_be(&mut self) -> Option<u16> { self.next_u16::<BigEndian>() }
 
-    pub fn next_u32   (&mut self) -> Option<u32> { self.next_bytes::<4>().map(u32::from_ne_bytes) }
-    pub fn next_u32_ne(&mut self) -> Option<u32> { self.next_bytes::<4>().map(u32::from_ne_bytes) }
-    pub fn next_u32_le(&mut self) -> Option<u32> { self.next_bytes::<4>().map(u32::from_le_bytes) }
-    pub fn next_u32_be(&mut self) -> Option<u32> { self.next_bytes::<4>().map(u32::from_be_bytes) }
-    pub fn peek_u32   (&self)     -> Option<u32> { self.peek_bytes::<4>().map(u32::from_ne_bytes) }
-    pub fn peek_u32_ne(&self)     -> Option<u32> { self.peek_bytes::<4>().map(u32::from_ne_bytes) }
-    pub fn peek_u32_le(&self)     -> Option<u32> { self.peek_bytes::<4>().map(u32::from_le_bytes) }
-    pub fn peek_u32_be(&self)     -> Option<u32> { self.peek_bytes::<4>().map(u32::from_be_bytes) }
+    pub fn peek_u32<B: ByteOrder>(&self) -> Option<u32> { self.peek_bytes::<4>().map(B::read_u32) }
+    pub fn peek_u32_ne(&self) -> Option<u32> { self.peek_u32::<NativeEndian>() }
+    pub fn peek_u32_le(&self) -> Option<u32> { self.peek_u32::<LittleEndian>() }
+    pub fn peek_u32_be(&self) -> Option<u32> { self.peek_u32::<BigEndian>() }
+    pub fn next_u32<B: ByteOrder>(&mut self) -> Option<u32> { self.next_bytes::<4>().map(B::read_u32) }
+    pub fn next_u32_ne(&mut self) -> Option<u32> { self.next_u32::<NativeEndian>() }
+    pub fn next_u32_le(&mut self) -> Option<u32> { self.next_u32::<LittleEndian>() }
+    pub fn next_u32_be(&mut self) -> Option<u32> { self.next_u32::<BigEndian>() }
 
-    pub fn next_u64   (&mut self) -> Option<u64> { self.next_bytes::<8>().map(u64::from_ne_bytes) }
-    pub fn next_u64_ne(&mut self) -> Option<u64> { self.next_bytes::<8>().map(u64::from_ne_bytes) }
-    pub fn next_u64_le(&mut self) -> Option<u64> { self.next_bytes::<8>().map(u64::from_le_bytes) }
-    pub fn next_u64_be(&mut self) -> Option<u64> { self.next_bytes::<8>().map(u64::from_be_bytes) }
-    pub fn peek_u64   (&self)     -> Option<u64> { self.peek_bytes::<8>().map(u64::from_ne_bytes) }
-    pub fn peek_u64_ne(&self)     -> Option<u64> { self.peek_bytes::<8>().map(u64::from_ne_bytes) }
-    pub fn peek_u64_le(&self)     -> Option<u64> { self.peek_bytes::<8>().map(u64::from_le_bytes) }
-    pub fn peek_u64_be(&self)     -> Option<u64> { self.peek_bytes::<8>().map(u64::from_be_bytes) }
+    pub fn peek_u64<B: ByteOrder>(&self) -> Option<u64> { self.peek_bytes::<8>().map(B::read_u64) }
+    pub fn peek_u64_ne(&self) -> Option<u64> { self.peek_u64::<NativeEndian>() }
+    pub fn peek_u64_le(&self) -> Option<u64> { self.peek_u64::<LittleEndian>() }
+    pub fn peek_u64_be(&self) -> Option<u64> { self.peek_u64::<BigEndian>() }
+    pub fn next_u64<B: ByteOrder>(&mut self) -> Option<u64> { self.next_bytes::<8>().map(B::read_u64) }
+    pub fn next_u64_ne(&mut self) -> Option<u64> { self.next_u64::<NativeEndian>() }
+    pub fn next_u64_le(&mut self) -> Option<u64> { self.next_u64::<LittleEndian>() }
+    pub fn next_u64_be(&mut self) -> Option<u64> { self.next_u64::<BigEndian>() }
 
+    pub fn peek_i8<B: ByteOrder>(&self) -> Option<i8> { self.peek_bytes::<1>().map(B::read_i8) }
+    pub fn peek_i8_ne(&self) -> Option<i8> { self.peek_i8::<NativeEndian>() }
+    pub fn peek_i8_le(&self) -> Option<i8> { self.peek_i8::<LittleEndian>() }
+    pub fn peek_i8_be(&self) -> Option<i8> { self.peek_i8::<BigEndian>() }
+    pub fn next_i8<B: ByteOrder>(&mut self) -> Option<i8> { self.next_bytes::<1>().map(B::read_i8) }
+    pub fn next_i8_ne(&mut self) -> Option<i8> { self.next_i8::<NativeEndian>() }
+    pub fn next_i8_le(&mut self) -> Option<i8> { self.next_i8::<LittleEndian>() }
+    pub fn next_i8_be(&mut self) -> Option<i8> { self.next_i8::<BigEndian>() }
 
-    pub fn next_i8   (&mut self) -> Option<i8> { self.next_bytes::<1>().map(i8::from_ne_bytes) }
-    pub fn next_i8_ne(&mut self) -> Option<i8> { self.next_bytes::<1>().map(i8::from_ne_bytes) }
-    pub fn next_i8_le(&mut self) -> Option<i8> { self.next_bytes::<1>().map(i8::from_le_bytes) }
-    pub fn next_i8_be(&mut self) -> Option<i8> { self.next_bytes::<1>().map(i8::from_be_bytes) }
-    pub fn peek_i8   (&self)     -> Option<i8> { self.peek_bytes::<1>().map(i8::from_ne_bytes) }
-    pub fn peek_i8_ne(&self)     -> Option<i8> { self.peek_bytes::<1>().map(i8::from_ne_bytes) }
-    pub fn peek_i8_le(&self)     -> Option<i8> { self.peek_bytes::<1>().map(i8::from_le_bytes) }
-    pub fn peek_i8_be(&self)     -> Option<i8> { self.peek_bytes::<1>().map(i8::from_be_bytes) }
+    pub fn peek_i16<B: ByteOrder>(&self) -> Option<i16> { self.peek_bytes::<2>().map(B::read_i16) }
+    pub fn peek_i16_ne(&self) -> Option<i16> { self.peek_i16::<NativeEndian>() }
+    pub fn peek_i16_le(&self) -> Option<i16> { self.peek_i16::<LittleEndian>() }
+    pub fn peek_i16_be(&self) -> Option<i16> { self.peek_i16::<BigEndian>() }
+    pub fn next_i16<B: ByteOrder>(&mut self) -> Option<i16> { self.next_bytes::<2>().map(B::read_i16) }
+    pub fn next_i16_ne(&mut self) -> Option<i16> { self.next_i16::<NativeEndian>() }
+    pub fn next_i16_le(&mut self) -> Option<i16> { self.next_i16::<LittleEndian>() }
+    pub fn next_i16_be(&mut self) -> Option<i16> { self.next_i16::<BigEndian>() }
 
-    pub fn next_i16   (&mut self) -> Option<i16> { self.next_bytes::<2>().map(i16::from_ne_bytes) }
-    pub fn next_i16_ne(&mut self) -> Option<i16> { self.next_bytes::<2>().map(i16::from_ne_bytes) }
-    pub fn next_i16_le(&mut self) -> Option<i16> { self.next_bytes::<2>().map(i16::from_le_bytes) }
-    pub fn next_i16_be(&mut self) -> Option<i16> { self.next_bytes::<2>().map(i16::from_be_bytes) }
-    pub fn peek_i16   (&self)     -> Option<i16> { self.peek_bytes::<2>().map(i16::from_ne_bytes) }
-    pub fn peek_i16_ne(&self)     -> Option<i16> { self.peek_bytes::<2>().map(i16::from_ne_bytes) }
-    pub fn peek_i16_le(&self)     -> Option<i16> { self.peek_bytes::<2>().map(i16::from_le_bytes) }
-    pub fn peek_i16_be(&self)     -> Option<i16> { self.peek_bytes::<2>().map(i16::from_be_bytes) }
+    pub fn peek_i32<B: ByteOrder>(&self) -> Option<i32> { self.peek_bytes::<4>().map(B::read_i32) }
+    pub fn peek_i32_ne(&self) -> Option<i32> { self.peek_i32::<NativeEndian>() }
+    pub fn peek_i32_le(&self) -> Option<i32> { self.peek_i32::<LittleEndian>() }
+    pub fn peek_i32_be(&self) -> Option<i32> { self.peek_i32::<BigEndian>() }
+    pub fn next_i32<B: ByteOrder>(&mut self) -> Option<i32> { self.next_bytes::<4>().map(B::read_i32) }
+    pub fn next_i32_ne(&mut self) -> Option<i32> { self.next_i32::<NativeEndian>() }
+    pub fn next_i32_le(&mut self) -> Option<i32> { self.next_i32::<LittleEndian>() }
+    pub fn next_i32_be(&mut self) -> Option<i32> { self.next_i32::<BigEndian>() }
 
-    pub fn next_i32   (&mut self) -> Option<i32> { self.next_bytes::<4>().map(i32::from_ne_bytes) }
-    pub fn next_i32_ne(&mut self) -> Option<i32> { self.next_bytes::<4>().map(i32::from_ne_bytes) }
-    pub fn next_i32_le(&mut self) -> Option<i32> { self.next_bytes::<4>().map(i32::from_le_bytes) }
-    pub fn next_i32_be(&mut self) -> Option<i32> { self.next_bytes::<4>().map(i32::from_be_bytes) }
-    pub fn peek_i32   (&self)     -> Option<i32> { self.peek_bytes::<4>().map(i32::from_ne_bytes) }
-    pub fn peek_i32_ne(&self)     -> Option<i32> { self.peek_bytes::<4>().map(i32::from_ne_bytes) }
-    pub fn peek_i32_le(&self)     -> Option<i32> { self.peek_bytes::<4>().map(i32::from_le_bytes) }
-    pub fn peek_i32_be(&self)     -> Option<i32> { self.peek_bytes::<4>().map(i32::from_be_bytes) }
+    pub fn peek_i64<B: ByteOrder>(&self) -> Option<i64> { self.peek_bytes::<8>().map(B::read_i64) }
+    pub fn peek_i64_ne(&self) -> Option<i64> { self.peek_i64::<NativeEndian>() }
+    pub fn peek_i64_le(&self) -> Option<i64> { self.peek_i64::<LittleEndian>() }
+    pub fn peek_i64_be(&self) -> Option<i64> { self.peek_i64::<BigEndian>() }
+    pub fn next_i64<B: ByteOrder>(&mut self) -> Option<i64> { self.next_bytes::<8>().map(B::read_i64) }
+    pub fn next_i64_ne(&mut self) -> Option<i64> { self.next_i64::<NativeEndian>() }
+    pub fn next_i64_le(&mut self) -> Option<i64> { self.next_i64::<LittleEndian>() }
+    pub fn next_i64_be(&mut self) -> Option<i64> { self.next_i64::<BigEndian>() }
 
-    pub fn next_i64   (&mut self) -> Option<i64> { self.next_bytes::<8>().map(i64::from_ne_bytes) }
-    pub fn next_i64_ne(&mut self) -> Option<i64> { self.next_bytes::<8>().map(i64::from_ne_bytes) }
-    pub fn next_i64_le(&mut self) -> Option<i64> { self.next_bytes::<8>().map(i64::from_le_bytes) }
-    pub fn next_i64_be(&mut self) -> Option<i64> { self.next_bytes::<8>().map(i64::from_be_bytes) }
-    pub fn peek_i64   (&self)     -> Option<i64> { self.peek_bytes::<8>().map(i64::from_ne_bytes) }
-    pub fn peek_i64_ne(&self)     -> Option<i64> { self.peek_bytes::<8>().map(i64::from_ne_bytes) }
-    pub fn peek_i64_le(&self)     -> Option<i64> { self.peek_bytes::<8>().map(i64::from_le_bytes) }
-    pub fn peek_i64_be(&self)     -> Option<i64> { self.peek_bytes::<8>().map(i64::from_be_bytes) }
+    pub fn peek_f32<B: ByteOrder>(&self) -> Option<f32> { self.peek_bytes::<4>().map(B::read_f32) }
+    pub fn peek_f32_ne(&self) -> Option<f32> { self.peek_f32::<NativeEndian>() }
+    pub fn peek_f32_le(&self) -> Option<f32> { self.peek_f32::<LittleEndian>() }
+    pub fn peek_f32_be(&self) -> Option<f32> { self.peek_f32::<BigEndian>() }
+    pub fn next_f32<B: ByteOrder>(&mut self) -> Option<f32> { self.next_bytes::<4>().map(B::read_f32) }
+    pub fn next_f32_ne(&mut self) -> Option<f32> { self.next_f32::<NativeEndian>() }
+    pub fn next_f32_le(&mut self) -> Option<f32> { self.next_f32::<LittleEndian>() }
+    pub fn next_f32_be(&mut self) -> Option<f32> { self.next_f32::<BigEndian>() }
 
-
-    pub fn next_f32   (&mut self) -> Option<f32> { self.next_bytes::<4>().map(f32::from_ne_bytes) }
-    pub fn next_f32_ne(&mut self) -> Option<f32> { self.next_bytes::<4>().map(f32::from_ne_bytes) }
-    pub fn next_f32_le(&mut self) -> Option<f32> { self.next_bytes::<4>().map(f32::from_le_bytes) }
-    pub fn next_f32_be(&mut self) -> Option<f32> { self.next_bytes::<4>().map(f32::from_be_bytes) }
-    pub fn peek_f32   (&self)     -> Option<f32> { self.peek_bytes::<4>().map(f32::from_ne_bytes) }
-    pub fn peek_f32_ne(&self)     -> Option<f32> { self.peek_bytes::<4>().map(f32::from_ne_bytes) }
-    pub fn peek_f32_le(&self)     -> Option<f32> { self.peek_bytes::<4>().map(f32::from_le_bytes) }
-    pub fn peek_f32_be(&self)     -> Option<f32> { self.peek_bytes::<4>().map(f32::from_be_bytes) }
-
-    pub fn next_f64   (&mut self) -> Option<f64> { self.next_bytes::<8>().map(f64::from_ne_bytes) }
-    pub fn next_f64_ne(&mut self) -> Option<f64> { self.next_bytes::<8>().map(f64::from_ne_bytes) }
-    pub fn next_f64_le(&mut self) -> Option<f64> { self.next_bytes::<8>().map(f64::from_le_bytes) }
-    pub fn next_f64_be(&mut self) -> Option<f64> { self.next_bytes::<8>().map(f64::from_be_bytes) }
-    pub fn peek_f64   (&self)     -> Option<f64> { self.peek_bytes::<8>().map(f64::from_ne_bytes) }
-    pub fn peek_f64_ne(&self)     -> Option<f64> { self.peek_bytes::<8>().map(f64::from_ne_bytes) }
-    pub fn peek_f64_le(&self)     -> Option<f64> { self.peek_bytes::<8>().map(f64::from_le_bytes) }
-    pub fn peek_f64_be(&self)     -> Option<f64> { self.peek_bytes::<8>().map(f64::from_be_bytes) }
-
+    pub fn peek_f64<B: ByteOrder>(&self) -> Option<f64> { self.peek_bytes::<8>().map(B::read_f64) }
+    pub fn peek_f64_ne(&self) -> Option<f64> { self.peek_f64::<NativeEndian>() }
+    pub fn peek_f64_le(&self) -> Option<f64> { self.peek_f64::<LittleEndian>() }
+    pub fn peek_f64_be(&self) -> Option<f64> { self.peek_f64::<BigEndian>() }
+    pub fn next_f64<B: ByteOrder>(&mut self) -> Option<f64> { self.next_bytes::<8>().map(B::read_f64) }
+    pub fn next_f64_ne(&mut self) -> Option<f64> { self.next_f64::<NativeEndian>() }
+    pub fn next_f64_le(&mut self) -> Option<f64> { self.next_f64::<LittleEndian>() }
+    pub fn next_f64_be(&mut self) -> Option<f64> { self.next_f64::<BigEndian>() }
 }
 

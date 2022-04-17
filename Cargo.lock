@@ -3,5 +3,13 @@
 version = 3
 
 [[package]]
+name = "simple-byte-order"
+version = "0.1.0"
+source = "git+https://github.com/leddoo/simple-byte-order#d283bd9bb4cefe682b1a5fb946f2796d0e804986"
+
+[[package]]
 name = "slice-reader"
 version = "0.1.0"
+dependencies = [
+ "simple-byte-order",
+]
