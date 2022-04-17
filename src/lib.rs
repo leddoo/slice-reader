@@ -1,6 +1,8 @@
 #[derive(Clone)]
 pub struct Reader<'buf, T> {
     pub buffer: &'buf [T],
+
+    /// <= buffer.len()
     pub cursor: usize,
 }
 
