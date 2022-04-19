@@ -9,7 +9,7 @@ source = "git+https://github.com/leddoo/simple-byte-order#d283bd9bb4cefe682b1a5f
 
 [[package]]
 name = "slice-reader"
-version = "0.1.0"
+version = "0.1.1"
 dependencies = [
  "simple-byte-order",
 ]

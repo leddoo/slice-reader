@@ -66,6 +66,7 @@ impl<'rdr, T> Reader<'rdr, T> {
 
 
 
+pub use byte_order;
 use byte_order::*;
 
 impl<'rdr> Reader<'rdr, u8> {
